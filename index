@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Expense Tracker">
+
+<meta name="mobile-web-app-capable" content="yes">
+
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Family Expense Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: #f0f4f8; min-height: 100vh; padding: 1.25rem; }
+  .card { background: #fff; border-radius: 20px; padding: 1.5rem; max-width: 540px; margin: 0 auto; box-shadow: 0 4px 24px rgba(0,0,0,.07); }
+  h1 { font-size: 21px; font-weight: 600; text-align: center; color: #0f172a; }
+  .subtitle { font-size: 13px; color: #94a3b8; text-align: center; margin-top: 3px; }
+
+  .total-box { background: #0f172a; border-radius: 14px; padding: 1.1rem; text-align: center; margin: 1.25rem 0; }
+  .total-box .lbl { font-size: 10px; letter-spacing: .1em; color: #64748b; text-transform: uppercase; }
+  .total-box .amt { font-size: 30px; font-weight: 600; color: #fff; margin-top: 4px; }
+  .total-box .amt2 { font-size: 14px; color: #64748b; margin-top: 2px; }
+
+  .sec { font-size: 10px; font-weight: 600; letter-spacing: .08em; color: #94a3b8; text-transform: uppercase; margin-bottom: 6px; margin-top: 1rem; }
+
+  .trip-panel { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 1rem; margin-bottom: 1rem; }
+  .trip-active { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #0f172a; font-weight: 500; flex-wrap: wrap; }
+  .cur-badge { font-size: 11px; background: #dbeafe; color: #1d4ed8; border-radius: 20px; padding: 2px 8px; font-weight: 600; margin-left: auto; }
+  .people-badges { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+  .person-pill { font-size: 11px; background: #f1f5f9; color: #475569; border-radius: 20px; padding: 2px 10px; }
+
+  .trip-list { margin-top: .75rem; display: none; }
+  .trip-list.open { display: block; }
+  .trip-item { display: flex; align-items: center; justify-content: space-between; padding: .5rem .65rem; border-radius: 8px; cursor: pointer; font-size: 13px; border: 1px solid #e2e8f0; margin-bottom: 6px; background: #fff; }
+  .trip-item:hover { background: #f1f5f9; }
+  .trip-item.active { border-color: #0f172a; font-weight: 600; }
+  .trip-item .trip-meta { font-size: 11px; color: #94a3b8; margin-top: 1px; }
+
+  .new-trip-form { display: none; margin-top: .75rem; }
+  .new-trip-form.open { display: block; }
+
+  .person-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 4px; }
+  .person-input-wrap { position: relative; }
+  .person-input-wrap .p-num { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #94a3b8; font-weight: 600; pointer-events: none; }
+  .person-input-wrap input { padding-left: 26px; }
+
+  label { font-size: 10px; font-weight: 600; letter-spacing: .07em; color: #94a3b8; text-transform: uppercase; display: block; margin-bottom: 5px; }
+  input[type=text], input[type=number], input[type=date], select {
+    width: 100%; padding: .55rem .75rem; border: 1.5px solid #e2e8f0; border-radius: 10px;
+    font-size: 14px; font-family: 'DM Sans', sans-serif; color: #0f172a; background: #fff; outline: none; transition: border-color .15s;
+  }
+  input:focus, select:focus { border-color: #94a3b8; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .field { margin-bottom: 10px; }
+
+  .amount-wrap { position: relative; }
+  .amount-wrap select.cur-select { position: absolute; right: 0; top: 0; bottom: 0; width: 76px; border: none; border-left: 1.5px solid #e2e8f0; border-radius: 0 10px 10px 0; background: #f8fafc; font-size: 13px; font-weight: 600; color: #0f172a; padding: 0 .4rem; cursor: pointer; }
+  .amount-wrap input { padding-right: 84px; }
+
+  .btn-add { width: 100%; padding: .72rem; background: #0f172a; color: #fff; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 4px; }
+  .btn-add:disabled { opacity: .45; cursor: not-allowed; }
+  .btn-report { width: 100%; padding: .6rem; background: transparent; color: #64748b; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 14px; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 8px; }
+  .btn-report:hover { background: #f8fafc; }
+  .btn-sm { font-size: 12px; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 500; border: none; }
+  .btn-new { background: #eff6ff; color: #2563eb; }
+  .btn-trips { background: #f1f5f9; color: #475569; }
+  .btn-save { background: #0f172a; color: #fff; }
+  .btn-cancel { background: #f1f5f9; color: #64748b; }
+
+  .entry { display: flex; align-items: center; padding: .65rem 0; border-bottom: 1px solid #f1f5f9; gap: 8px; }
+  .entry:last-child { border-bottom: none; }
+  .entry-left { flex: 1; }
+  .entry-left .desc { font-size: 14px; font-weight: 500; color: #0f172a; }
+  .entry-left .meta { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+  .entry-right { text-align: right; }
+  .entry-right .price { font-size: 15px; font-weight: 600; color: #0f172a; }
+  .entry-right .who { font-size: 12px; color: #94a3b8; }
+  .entry-actions { display: flex; gap: 4px; }
+  .btn-icon { width: 30px; height: 30px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+  .btn-icon:hover { background: #f1f5f9; }
+  .btn-icon.del:hover { background: #fef2f2; border-color: #fecaca; }
+
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100; align-items: center; justify-content: center; padding: 1rem; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: #fff; border-radius: 20px; padding: 1.5rem; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; }
+  .modal h2 { font-size: 17px; font-weight: 600; margin-bottom: 1rem; color: #0f172a; }
+  .modal-actions { display: flex; gap: 8px; margin-top: .5rem; }
+  .modal-actions button { flex: 1; }
+
+  .empty { text-align: center; color: #94a3b8; font-size: 13px; padding: 1.25rem 0; }
+  .msg { font-size: 13px; color: #10b981; margin-top: 8px; text-align: center; min-height: 18px; }
+  .err { color: #ef4444; }
+  input[disabled] { background: #f8fafc; color: #94a3b8; cursor: not-allowed; }
+  .hint { font-size: 11px; color: #94a3b8; margin-bottom: 8px; margin-top: -4px; }
+  hr { border: none; border-top: 1px solid #f1f5f9; margin: 1rem 0; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Family Expense Tracker</h1>
+  <p class="subtitle">Shared real-time tracking</p>
+
+  <div class="total-box">
+    <div class="lbl">Total Spent</div>
+    <div class="amt" id="total">$0.00</div>
+    <div class="amt2" id="totalSecondary"></div>
+  </div>
+
+  <div class="sec">Current Trip</div>
+  <div class="trip-panel">
+    <div class="trip-active">
+      <span id="tripActiveName">No trip selected</span>
+      <span class="cur-badge" id="tripCurBadge" style="display:none"></span>
+      <button class="btn-sm btn-trips" onclick="toggleTripList()" id="switchBtn" style="display:none">Switch trip</button>
+      <button class="btn-sm btn-new" onclick="toggleNewTripForm()">+ New trip</button>
+    </div>
+    <div class="people-badges" id="peopleBadges"></div>
+    <div class="trip-list" id="tripList"></div>
+
+    <div class="new-trip-form" id="newTripForm">
+      <hr/>
+      <div class="field">
+        <label>Trip name</label>
+        <input type="text" id="tripInput" placeholder="e.g., Siem Reap June 2026" />
+      </div>
+
+      <div class="field">
+        <label>Local currency for this trip</label>
+        <select id="localCurrency">
+          <option value="KHR" data-symbol="៛" data-rate="4100">KHR – Cambodian Riel (Cambodia)</option>
+          <option value="THB" data-symbol="฿" data-rate="33">THB – Thai Baht (Thailand)</option>
+          <option value="VND" data-symbol="₫" data-rate="25000">VND – Vietnamese Dong (Vietnam)</option>
+          <option value="MYR" data-symbol="RM" data-rate="4.7">MYR – Malaysian Ringgit (Malaysia)</option>
+          <option value="SGD" data-symbol="S$" data-rate="1.35">SGD – Singapore Dollar (Singapore)</option>
+          <option value="IDR" data-symbol="Rp" data-rate="16000">IDR – Indonesian Rupiah (Indonesia)</option>
+          <option value="PHP" data-symbol="₱" data-rate="56">PHP – Philippine Peso (Philippines)</option>
+          <option value="MMK" data-symbol="K" data-rate="2100">MMK – Myanmar Kyat (Myanmar)</option>
+          <option value="LAK" data-symbol="₭" data-rate="22000">LAK – Lao Kip (Laos)</option>
+          <option value="JPY" data-symbol="¥" data-rate="155">JPY – Japanese Yen (Japan)</option>
+          <option value="KRW" data-symbol="₩" data-rate="1350">KRW – South Korean Won (South Korea)</option>
+          <option value="CNY" data-symbol="¥" data-rate="7.25">CNY – Chinese Yuan (China)</option>
+          <option value="INR" data-symbol="₹" data-rate="83">INR – Indian Rupee (India)</option>
+          <option value="EUR" data-symbol="€" data-rate="0.92">EUR – Euro (Europe)</option>
+          <option value="GBP" data-symbol="£" data-rate="0.79">GBP – British Pound (UK)</option>
+          <option value="AUD" data-symbol="A$" data-rate="1.53">AUD – Australian Dollar (Australia)</option>
+          <option value="HKD" data-symbol="HK$" data-rate="7.82">HKD – Hong Kong Dollar (Hong Kong)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Exchange rate (1 USD = ? local)</label>
+        <input type="number" id="exchangeRate" placeholder="e.g., 4100" step="any" />
+      </div>
+
+      <div class="field">
+        <label>People on this trip</label>
+        <p class="hint">Enter at least 1 name. Leave extras blank.</p>
+        <div class="person-grid">
+          <div class="person-input-wrap"><span class="p-num">1</span><input type="text" class="person-name" placeholder="e.g. Dad" /></div>
+          <div class="person-input-wrap"><span class="p-num">2</span><input type="text" class="person-name" placeholder="e.g. Mum" /></div>
+          <div class="person-input-wrap"><span class="p-num">3</span><input type="text" class="person-name" placeholder="optional" /></div>
+          <div class="person-input-wrap"><span class="p-num">4</span><input type="text" class="person-name" placeholder="optional" /></div>
+          <div class="person-input-wrap"><span class="p-num">5</span><input type="text" class="person-name" placeholder="optional" /></div>
+          <div class="person-input-wrap"><span class="p-num">6</span><input type="text" class="person-name" placeholder="optional" /></div>
+        </div>
+        <p class="hint" style="margin-top:4px;">A "Shared" option is always added automatically.</p>
+      </div>
+
+      <div style="display:flex;gap:8px;">
+        <button class="btn-sm btn-save" onclick="startNewTrip()">Start trip</button>
+        <button class="btn-sm btn-cancel" onclick="toggleNewTripForm()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Item description</label>
+    <input type="text" id="desc" placeholder="e.g., Grocery, Coffee, Taxi" />
+  </div>
+  <div class="row2">
+    <div class="field">
+      <label>Amount</label>
+      <div class="amount-wrap">
+        <input type="number" id="amount" placeholder="0.00" min="0" step="0.01" />
+        <select class="cur-select" id="amountCurrency">
+          <option value="USD">USD</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Date</label>
+      <input type="date" id="expDate" />
+    </div>
+  </div>
+  <div class="row2">
+    <div class="field">
+      <label>Category</label>
+      <select id="category">
+        <option value="Food & Dining">🍽 Food & Dining</option>
+        <option value="Transport">🚗 Transport</option>
+        <option value="Accommodation">🏨 Accommodation</option>
+        <option value="Activities">🎡 Activities</option>
+        <option value="Shopping">🛍 Shopping</option>
+        <option value="Health">💊 Health</option>
+        <option value="Communication">📱 Communication</option>
+        <option value="Other">🔧 Other</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Spent by</label>
+      <select id="spentBy">
+        <option value="Shared">Shared</option>
+      </select>
+    </div>
+  </div>
+
+  <button class="btn-add" id="addBtn" onclick="addExpense()">Add Expense</button>
+  <button class="btn-report" onclick="viewReport()">📊 View Report</button>
+  <div class="msg" id="msg"></div>
+
+  <div class="sec" style="margin-top:1.25rem;">Recent History</div>
+  <div id="history"><div class="empty">Select or create a trip to begin</div></div>
+</div>
+
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h2>✏️ Edit Expense</h2>
+    <input type="hidden" id="editId" />
+    <div class="field"><label>Description</label><input type="text" id="editDesc" /></div>
+    <div class="row2">
+      <div class="field"><label>Amount (USD)</label><input type="number" id="editAmount" step="0.01" /></div>
+      <div class="field"><label>Date</label><input type="date" id="editDate" /></div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Category</label>
+        <select id="editCategory">
+          <option value="Food & Dining">🍽 Food & Dining</option>
+          <option value="Transport">🚗 Transport</option>
+          <option value="Accommodation">🏨 Accommodation</option>
+          <option value="Activities">🎡 Activities</option>
+          <option value="Shopping">🛍 Shopping</option>
+          <option value="Health">💊 Health</option>
+          <option value="Communication">📱 Communication</option>
+          <option value="Other">🔧 Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Spent by</label>
+        <select id="editSpentBy"></select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-sm btn-save" style="padding:.6rem" onclick="saveEdit()">Save changes</button>
+      <button class="btn-sm btn-cancel" style="padding:.6rem" onclick="closeEdit()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── PASTE YOUR COPIED GOOGLE WEB APP URL HERE ───────────────────────────
+const GOOGLE_SCRIPT_URL = 'PASTE_YOUR_COPIED_WEB_APP_URL_HERE';
+// ──────────────────────────────────────────────────────────────────────
+
+let currentTrip    = localStorage.getItem('trip_name')     || 'Siem Reap';
+let localCurCode   = localStorage.getItem('trip_localCur') || 'KHR';
+let localCurSymbol = localStorage.getItem('trip_localSym') || '៛';
+let exchangeRate   = parseFloat(localStorage.getItem('trip_rate')) || 4100;
+let tripPeople     = JSON.parse(localStorage.getItem('trip_people') || '["Shared"]');
+let allTrips       = JSON.parse(localStorage.getItem('all_trips')   || '[]');
+let showTripList   = false;
+
+document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
+
+document.getElementById('localCurrency').addEventListener('change', function() {
+  document.getElementById('exchangeRate').value = this.options[this.selectedIndex].dataset.rate || '';
+});
+
+function saveTripsLocal() { localStorage.setItem('all_trips', JSON.stringify(allTrips)); }
+
+function buildSpentByDropdown(selectId) {
+  const sel = document.getElementById(selectId);
+  sel.innerHTML = tripPeople.map(p => `<option value="${p}">${p}</option>`).join('');
+}
+
+function updateTripUI() {
+  document.getElementById('tripActiveName').textContent = '✈️ ' + currentTrip;
+  const badge = document.getElementById('tripCurBadge');
+  badge.textContent = 'USD + ' + localCurCode;
+  badge.style.display = 'inline';
+  document.getElementById('switchBtn').style.display = allTrips.length > 1 ? 'inline' : 'none';
+
+  const pb = document.getElementById('peopleBadges');
+  pb.innerHTML = tripPeople.map(p => `<span class="person-pill">${p}</span>`).join('');
+
+  const sel = document.getElementById('amountCurrency');
+  sel.innerHTML = `<option value="USD">USD</option><option value="${localCurCode}">${localCurCode}</option>`;
+
+  buildSpentByDropdown('spentBy');
+}
+
+function renderTripList() {
+  const el = document.getElementById('tripList');
+  el.innerHTML = allTrips.map(t => `
+    <div class="trip-item ${t.name===currentTrip?'active':''}" onclick="switchTrip('${t.name.replace(/'/g,"\\'")}')">
+      <div>
+        <div>${t.name===currentTrip?'✈️ ':''}${t.name}</div>
+        <div class="trip-meta">USD + ${t.localCur} · ${(t.people||[]).filter(p=>p!=='Shared').join(', ')}</div>
+      </div>
+      ${t.name===currentTrip?'<span style="font-size:11px;color:#16a34a;">● Active</span>':''}
+    </div>`).join('');
+}
+
+function toggleTripList() {
+  showTripList = !showTripList;
+  const el = document.getElementById('tripList');
+  if (showTripList) { renderTripList(); el.classList.add('open'); }
+  else el.classList.remove('open');
+}
+
+function toggleNewTripForm() {
+  document.getElementById('newTripForm').classList.toggle('open');
+  document.getElementById('tripList').classList.remove('open');
+  showTripList = false;
+  const sel = document.getElementById('localCurrency');
+  document.getElementById('exchangeRate').value = sel.options[sel.selectedIndex].dataset.rate || '';
+}
+
+function switchTrip(name) {
+  const t = allTrips.find(x => x.name === name);
+  if (!t) return;
+  currentTrip    = t.name;
+  localCurCode   = t.localCur;
+  localCurSymbol = t.localSym;
+  exchangeRate   = t.rate;
+  tripPeople     = t.people || ['Shared'];
+  localStorage.setItem('trip_name',     currentTrip);
+  localStorage.setItem('trip_localCur', localCurCode);
+  localStorage.setItem('trip_localSym', localCurSymbol);
+  localStorage.setItem('trip_rate',     exchangeRate);
+  localStorage.setItem('trip_people',   JSON.stringify(tripPeople));
+  toggleTripList();
+  updateTripUI();
+  loadHistory();
+}
+
+function startNewTrip() {
+  const name = document.getElementById('tripInput').value.trim();
+  const rate  = parseFloat(document.getElementById('exchangeRate').value);
+  const sel   = document.getElementById('localCurrency');
+  const opt   = sel.options[sel.selectedIndex];
+
+  if (!name)            { alert('Please enter a trip name'); return; }
+  if (!rate || rate<=0) { alert('Please enter a valid exchange rate'); return; }
+
+  const inputs = document.querySelectorAll('.person-name');
+  const people = [];
+  inputs.forEach(inp => { const v = inp.value.trim(); if (v) people.push(v); });
+  if (people.length === 0) { alert('Please enter at least one person name'); return; }
+  if (!people.includes('Shared')) people.push('Shared');
+
+  currentTrip    = name;
+  localCurCode   = sel.value;
+  localCurSymbol = opt.dataset.symbol;
+  exchangeRate   = rate;
+  tripPeople     = people;
+
+  localStorage.setItem('trip_name',     currentTrip);
+  localStorage.setItem('trip_localCur', localCurCode);
+  localStorage.setItem('trip_localSym', localCurSymbol);
+  localStorage.setItem('trip_rate',     exchangeRate);
+  localStorage.setItem('trip_people',   JSON.stringify(tripPeople));
+
+  if (!allTrips.find(t => t.name === name)) {
+    allTrips.push({ name, localCur: localCurCode, localSym: localCurSymbol, rate, people });
+    saveTripsLocal();
+  }
+
+  document.querySelectorAll('.person-name').forEach(i => i.value = '');
+  document.getElementById('tripInput').value = '';
+  toggleNewTripForm();
+  updateTripUI();
+  loadHistory();
+}
+
+function toUSD(amount, currency) {
+  return currency === 'USD' ? amount : amount / exchangeRate;
+}
+
+async function loadHistory() {
+  if (!currentTrip) return;
+  try {
+    const res = await fetch(`${GOOGLE_SCRIPT_URL}?trip_name=${encodeURIComponent(currentTrip)}`);
+    const data = await res.json();
+    renderHistory(data);
+  } catch (err) {
+    console.error("Error loading history: ", err);
+  }
+}
+
+function renderHistory(rows) {
+  const el = document.getElementById('history');
+  if (!rows || rows.length === 0) {
+    el.innerHTML = '<div class="empty">No expenses yet for this trip</div>';
+    document.getElementById('total').textContent = '$0.00';
+    document.getElementById('totalSecondary').textContent = '';
+    return;
+  }
+  const totalUSD   = rows.reduce((s,r) => s + parseFloat(r.amount_usd||0), 0);
+  const totalLocal = totalUSD * exchangeRate;
+  document.getElementById('total').textContent =
+    '$' + totalUSD.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('totalSecondary').textContent =
+    '≈ ' + localCurSymbol + totalLocal.toLocaleString('en',{maximumFractionDigits:0});
+
+  el.innerHTML = rows.map(r => {
+    const usd  = parseFloat(r.amount_usd||0);
+    const disp = r.currency === localCurCode
+      ? localCurSymbol + parseFloat(r.amount_local||0).toLocaleString('en',{maximumFractionDigits:0})
+      : '$' + usd.toFixed(2);
+    return `
+      <div class="entry">
+        <div class="entry-left">
+          <div class="desc">${r.description}</div>
+          <div class="meta">${r.category} · ${r.expense_date}</div>
+        </div>
+        <div class="entry-right">
+          <div class="price">${disp}</div>
+          <div class="who">${r.spent_by||''}</div>
+        </div>
+        <div class="entry-actions">
+          <button class="btn-icon" onclick='openEdit(${JSON.stringify(r)})'>✏️</button>
+          <button class="btn-icon del" onclick="deleteEntry('${r.id}')">🗑️</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function addExpense() {
+  const desc     = document.getElementById('desc').value.trim();
+  const amount   = parseFloat(document.getElementById('amount').value);
+  const expDate  = document.getElementById('expDate').value;
+  const category = document.getElementById('category').value;
+  const spentBy  = document.getElementById('spentBy').value;
+  const currency = document.getElementById('amountCurrency').value;
+
+  if (!currentTrip)         { alert('Please set a trip first'); return; }
+  if (!desc)                { alert('Please enter a description'); return; }
+  if (!amount || amount<=0) { alert('Please enter a valid amount'); return; }
+
+  const amountUSD   = toUSD(amount, currency);
+  const amountLocal = currency === 'USD' ? amount * exchangeRate : amount;
+
+  const btn = document.getElementById('addBtn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+
+  try {
+    await fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      cache: 'no-cache',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: "insert",
+        data: {
+          trip_name: currentTrip, description: desc,
+          amount_usd: amountUSD, amount_local: amountLocal,
+          currency, local_currency: localCurCode,
+          category, spent_by: spentBy, expense_date: expDate
+        }
+      })
+    });
+
+    document.getElementById('desc').value = '';
+    document.getElementById('amount').value = '';
+    document.getElementById('msg').textContent = '✓ Saved!';
+    setTimeout(() => document.getElementById('msg').textContent = '', 2500);
+    // Give Google Sheets a brief second to record before pulling down history update
+    setTimeout(() => loadHistory(), 800);
+  } catch (err) {
+    document.getElementById('msg').innerHTML = '<span class="err">Error connecting to Google Sheets</span>';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Add Expense';
+  }
+}
+
+function openEdit(r) {
+  document.getElementById('editId').value       = r.id;
+  document.getElementById('editDesc').value     = r.description;
+  document.getElementById('editAmount').value   = parseFloat(r.amount_usd||0).toFixed(2);
+  document.getElementById('editDate').value     = r.expense_date;
+  document.getElementById('editCategory').value = r.category;
+  buildSpentByDropdown('editSpentBy');
+  document.getElementById('editSpentBy').value  = r.spent_by||tripPeople[0];
+  document.getElementById('editModal').classList.add('open');
+}
+function closeEdit() { document.getElementById('editModal').classList.remove('open'); }
+
+async function saveEdit() {
+  const id       = document.getElementById('editId').value;
+  const desc     = document.getElementById('editDesc').value.trim();
+  const amount   = parseFloat(document.getElementById('editAmount').value);
+  const expDate  = document.getElementById('editDate').value;
+  const category = document.getElementById('editCategory').value;
+  const spentBy  = document.getElementById('editSpentBy').value;
+  
+  if (!desc || !amount || amount<=0) { alert('Please fill in all fields'); return; }
+  
+  try {
+    await fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      cache: 'no-cache',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: "update",
+        id: id,
+        data: {
+          description: desc, amount_usd: amount,
+          amount_local: amount * exchangeRate,
+          expense_date: expDate, category, spent_by: spentBy
+        }
+      })
+    });
+    closeEdit();
+    setTimeout(() => loadHistory(), 800);
+  } catch (err) {
+    alert("Error updating record.");
+  }
+}
+
+async function deleteEntry(id) {
+  if (!confirm('Delete this expense?')) return;
+  try {
+    await fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      cache: 'no-cache',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: "delete", id: id })
+    });
+    setTimeout(() => loadHistory(), 500);
+  } catch (err) {
+    alert("Error deleting record.");
+  }
+}
+
+function viewReport() {
+  if (!currentTrip) { alert('No trip selected'); return; }
+  window.location.href = 'report.html?trip=' + encodeURIComponent(currentTrip);
+}
+
+// Init
+if (currentTrip && !allTrips.find(t => t.name === currentTrip)) {
+  allTrips.push({ name: currentTrip, localCur: localCurCode, localSym: localCurSymbol, rate: exchangeRate, people: tripPeople });
+  saveTripsLocal();
+}
+updateTripUI();
+loadHistory();
+</script>
+</body>
+</html>

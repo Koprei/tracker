@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Trip Expense Report</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: #f0f4f8; min-height: 100vh; padding: 1.25rem; color: #0f172a; }
+  .card { background: #fff; border-radius: 20px; padding: 1.5rem; max-width: 540px; margin: 0 auto; box-shadow: 0 4px 24px rgba(0,0,0,.07); }
+  
+  .header-actions { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+  .btn-back { background: #f1f5f9; color: #475569; border: none; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; text-decoration: none; font-family: 'DM Sans', sans-serif; }
+  .btn-back:hover { background: #e2e8f0; }
+  
+  h1 { font-size: 21px; font-weight: 600; text-align: center; color: #0f172a; }
+  .subtitle { font-size: 13px; color: #94a3b8; text-align: center; margin-top: 3px; margin-bottom: 1.25rem; }
+
+  .total-box { background: #0f172a; border-radius: 14px; padding: 1.1rem; text-align: center; margin-bottom: 1.25rem; }
+  .total-box .lbl { font-size: 10px; letter-spacing: .1em; color: #64748b; text-transform: uppercase; }
+  .total-box .amt { font-size: 30px; font-weight: 600; color: #fff; margin-top: 4px; }
+
+  .sec { font-size: 11px; font-weight: 600; letter-spacing: .08em; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; margin-top: 1.5rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 4px; }
+  
+  /* Breakdown Row Styles */
+  .item-row { display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0; font-size: 14px; border-bottom: 1px solid #f8fafc; }
+  .item-row:last-child { border-bottom: none; }
+  .item-label { font-weight: 500; color: #334155; }
+  .item-value { font-weight: 600; color: #0f172a; text-align: right; }
+  
+  /* Category Progress Bar UI */
+  .cat-wrapper { margin-bottom: 10px; }
+  .cat-info { display: flex; justify-content: space-between; font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+  .progress-bg { background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden; }
+  .progress-fill { background: #3b82f6; height: 100%; border-radius: 4px; width: 0%; transition: width 0.3s ease; }
+
+  .loading, .empty { text-align: center; color: #94a3b8; font-size: 14px; padding: 2rem 0; }
+  .error-msg { text-align: center; color: #ef4444; font-size: 13px; padding: 1rem; background: #fef2f2; border-radius: 10px; border: 1px solid #fecaca; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="header-actions">
+    <a href="index.html" class="btn-back">← Form</a>
+  </div>
+
+  <h1 id="tripTitle">Trip Report</h1>
+  <p class="subtitle" id="tripSubtitle">Analyzing settlement details</p>
+
+  <div class="total-box">
+    <div class="lbl">Grand Total Spent</div>
+    <div class="amt" id="reportTotal">$0.00</div>
+  </div>
+
+  <div id="loadingStatus" class="loading">Fetching data from Google Sheets...</div>
+  <div id="errorContainer" style="display:none;"></div>
+
+  <div id="reportContent" style="display:none;">
+    <!-- Section 1: Split Breakdown -->
+    <div class="sec">Individual Balances (Equal Split)</div>
+    <div id="balanceList"></div>
+
+    <!-- Section 2: Payer Summary -->
+    <div class="sec">Who Paid (Total Out of Pocket)</div>
+    <div id="payerList"></div>
+
+    <!-- Section 3: Category Breakdown -->
+    <div class="sec">Spending by Category</div>
+    <div id="categoryList"></div>
+  </div>
+</div>
+
+<script>
+// ── PASTE YOUR COPIED GOOGLE WEB APP URL HERE ───────────────────────────
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw8Ufgf_CZohrIrEc_QLwCKYR65KTDlzfc2PgeT0qYiGJSmiuUP6apx21NLVPZ3jn49RQ/exec';
+// ──────────────────────────────────────────────────────────────────────
+
+// Extract target trip from URL parameters
+const urlParams = new URLSearchParams(window.location.search);
+const currentTrip = urlParams.get('trip');
+
+// Fallback metadata if local storage configurations are inaccessible
+const tripPeople = JSON.parse(localStorage.getItem('trip_people') || '["Shared"]');
+
+if (!currentTrip) {
+  showError('No active trip specified. Please select a trip from the main tracker panel.');
+} else {
+  document.getElementById('tripTitle').textContent = currentTrip;
+  fetchReportData();
+}
+
+function showError(msg) {
+  document.getElementById('loadingStatus').style.display = 'none';
+  const errContainer = document.getElementById('errorContainer');
+  errContainer.innerHTML = `<div class="error-msg">${msg}</div>`;
+  errContainer.style.display = 'block';
+}
+
+async function fetchReportData() {
+  try {
+    // Appends an action identifier flag for the web app handler logic
+    const targetUrl = `${GOOGLE_SCRIPT_URL}?action=read&trip=${encodeURIComponent(currentTrip)}`;
+    
+    const response = await fetch(targetUrl);
+    if (!response.ok) throw new Error('Network visibility error communicating with script environment.');
+    
+    const data = await response.json();
+    processAndRenderReport(data);
+  } catch (err) {
+    console.error(err);
+    showError('Failed to access transaction records. Verify deployment configurations or web permission properties.');
+  }
+}
+
+function processAndRenderReport(rows) {
+  document.getElementById('loadingStatus').style.display = 'none';
+  
+  if (!rows || rows.length === 0) {
+    showError('No verified entries recorded for this specific deployment sequence.');
+    return;
+  }
+
+  document.getElementById('reportContent').style.display = 'block';
+
+  let grandTotal = 0;
+  let categoryMap = {};
+  let payerMap = {};
+
+  // Extract filtered array metrics 
+  const filteredPeople = tripPeople.filter(p => p !== 'Shared');
+  const participantCount = filteredPeople.length || 1; 
+
+  // Initialize data collection objects dynamically
+  filteredPeople.forEach(p => {
+    payerMap[p] = 0;
+  });
+
+  rows.forEach(r => {
+    // Normalizes column naming variations across script logic layers
+    const amountUSD = parseFloat(r.amount_usd || r.amount || 0);
+    const spentBy = r.spent_by || r.spend_by || 'Shared';
+    const cat = r.category || 'Other';
+
+    grandTotal += amountUSD;
+
+    // Track expenses by category
+    categoryMap[cat] = (categoryMap[cat] || 0) + amountUSD;
+
+    // Track out-of-pocket costs by individual payer
+    if (spentBy !== 'Shared') {
+      if (payerMap[spentBy] !== undefined) {
+        payerMap[spentBy] += amountUSD;
+      } else {
+        payerMap[spentBy] = amountUSD;
+      }
+    }
+  });
+
+  // Render Headline Core Value Total
+  document.getElementById('reportTotal').textContent = '$' + grandTotal.toLocaleString('en', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+  // Calculate standard equal split distribution metrics
+  const sharePerPerson = grandTotal / participantCount;
+
+  // 1. Build Balance Settlement Interface List
+  const balanceList = document.getElementById('balanceList');
+  balanceList.innerHTML = filteredPeople.map(p => {
+    const paid = payerMap[p] || 0;
+    const balance = paid - sharePerPerson;
+    let balanceText = '';
+    let statusStyle = '';
+
+    if (balance > 0) {
+      balanceText = `Gets back $${balance.toFixed(2)}`;
+      statusStyle = 'color: #16a34a;'; // green
+    } else if (balance < 0) {
+      balanceText = `Owes $${Math.abs(balance).toFixed(2)}`;
+      statusStyle = 'color: #dc2626;'; // red
+    } else {
+      balanceText = 'Settled up';
+      statusStyle = 'color: #64748b;'; // grey
+    }
+
+    return `
+      <div class="item-row">
+        <span class="item-label">${p}</span>
+        <span class="item-value" style="${statusStyle}">${balanceText}</span>
+      </div>`;
+  }).join('');
+
+  // 2. Build Payer Totals Interface List
+  const payerList = document.getElementById('payerList');
+  payerList.innerHTML = Object.keys(payerMap).map(p => `
+    <div class="item-row">
+      <span class="item-label">${p}</span>
+      <span class="item-value">$${payerMap[p].toLocaleString('en', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+    </div>`).join('');
+
+  // 3. Build Category Breakdown Metric Chart UI Elements
+  const categoryList = document.getElementById('categoryList');
+  categoryList.innerHTML = Object.keys(categoryMap).map(cat => {
+    const amt = categoryMap[cat];
+    const pct = grandTotal > 0 ? (amt / grandTotal) * 100 : 0;
+    return `
+      <div class="cat-wrapper">
+        <div class="cat-info">
+          <span class="item-label">${cat}</span>
+          <span class="item-value">$${amt.toFixed(2)} (${pct.toFixed(0)}%)</span>
+        </div>
+        <div class="progress-bg">
+          <div class="progress-fill" style="width: ${pct}%"></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+</script>
+</body>
+</html>

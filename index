@@ -261,7 +261,7 @@
 
 <script>
 // ── PASTE YOUR COPIED GOOGLE WEB APP URL HERE ───────────────────────────
-const GOOGLE_SCRIPT_URL = 'PASTE_YOUR_COPIED_WEB_APP_URL_HERE';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw8Ufgf_CZohrIrEc_QLwCKYR65KTDlzfc2PgeT0qYiGJSmiuUP6apx21NLVPZ3jn49RQ/exec';
 // ──────────────────────────────────────────────────────────────────────
 
 let currentTrip    = localStorage.getItem('trip_name')     || 'Siem Reap';

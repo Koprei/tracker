@@ -35,16 +35,9 @@
   .trip-item.active { border-color: #0f172a; background: #f8fafc; font-weight: 600; }
   .new-trip-form { display: none; margin-top: .75rem; }
   .new-trip-form.open { display: block; }
-  
   .person-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 4px; }
-  .person-input-wrap { position: relative; }
-  .person-input-wrap .p-num { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 12px; color: #94a3b8; font-weight: 600; }
-  .person-input-wrap input { padding-left: 28px; }
-  
   label { font-size: 11px; font-weight: 700; letter-spacing: .05em; color: #475569; text-transform: uppercase; display: block; margin-bottom: 6px; }
-  input[type=text], input[type=number], input[type=date], select { width: 100%; padding: .75rem .85rem; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 15px; font-family: 'DM Sans', sans-serif; color: #0f172a; background: #fff; outline: none; -webkit-appearance: none; }
-  input:focus, select:focus { border-color: #0f172a; box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.06); }
-  select { background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E"); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-right: 2.5rem; }
+  input[type=text], input[type=number], input[type=date], select { width: 100%; padding: .75rem .85rem; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 15px; font-family: 'DM Sans', sans-serif; color: #0f172a; background: #fff; outline: none; }
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
   .field { margin-bottom: 12px; }
   .amount-wrap { position: relative; }
@@ -52,12 +45,11 @@
   .amount-wrap input { padding-right: 90px; }
   .btn-add { width: 100%; padding: .9rem; background: #0f172a; color: #fff; border: none; border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 6px; }
   .btn-add:disabled { opacity: .45; cursor: not-allowed; }
-  .btn-report { width: 100%; padding: .75rem; background: #fff; color: #475569; border: 1.5px solid #e2e8f0; border-radius: 14px; font-size: 15px; font-weight: 600; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; }
+  .btn-report { width: 100%; padding: .75rem; background: #fff; color: #475569; border: 1.5px solid #e2e8f0; border-radius: 14px; font-size: 15px; font-weight: 600; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; }
   .btn-sm { font-size: 12px; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-weight: 600; border: none; }
   .btn-new { background: #e0f2fe; color: #0369a1; }
   .btn-trips { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
-  .btn-save { background: #0f172a; color: #fff; }
-  .btn-cancel { background: #f1f5f9; color: #64748b; }
+  .btn-save { background: #0f172a; color: #fff; padding: 8px; border-radius: 8px; cursor: pointer;}
   .entry { display: flex; align-items: center; padding: .85rem .25rem; border-bottom: 1px solid #f1f5f9; gap: 10px; }
   .entry-left { flex: 1; }
   .entry-left .desc { font-size: 15px; font-weight: 600; color: #0f172a; }
@@ -65,18 +57,10 @@
   .entry-right { text-align: right; margin-right: 4px; }
   .entry-right .price { font-size: 16px; font-weight: 700; color: #0f172a; }
   .entry-right .who { font-size: 12px; color: #64748b; margin-top: 1px; font-weight: 500; }
-  .entry-actions { display: flex; gap: 6px; }
-  .btn-icon { width: 34px; height: 34px; border-radius: 10px; border: 1px solid #e2e8f0; background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); z-index: 100; align-items: center; justify-content: center; padding: 1rem; backdrop-filter: blur(4px); }
-  .modal-overlay.open { display: flex; }
-  .modal { background: #fff; border-radius: 20px; padding: 1.5rem; width: 100%; max-width: 460px; }
-  .modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 1.25rem; }
-  .modal-actions { display: flex; gap: 10px; margin-top: 1rem; }
-  .modal-actions button { flex: 1; padding: 0.75rem; }
+  .btn-icon { width: 34px; height: 34px; border-radius: 10px; border: 1px solid #e2e8f0; background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; }
   .empty { text-align: center; color: #94a3b8; font-size: 14px; padding: 2rem 0; }
-  .msg { font-size: 14px; color: #059669; margin-top: 10px; text-align: center; min-height: 20px; font-weight: 600; }
+  .msg { font-size: 14px; color: #059669; margin-top: 10px; text-align: center; font-weight: 600; }
   .err { color: #dc2626; }
-  .hint { font-size: 12px; color: #64748b; margin-bottom: 8px; margin-top: -4px; }
   hr { border: none; border-top: 1px solid #e2e8f0; margin: 1.25rem 0; }
 </style>
 </head>
@@ -85,7 +69,7 @@
 <div class="app-container">
   <h1>Family Expense Tracker</h1>
   <p class="subtitle">Shared real-time tracking</p>
-  <div class="user-badge" id="userIdentityBadge" onclick="promptForIdentity(true)">Logging as: Guest</div>
+  <div class="user-badge" id="userIdentityBadge" onclick="promptForIdentity()">Logging as: Guest</div>
 
   <div class="total-box">
     <div class="lbl">Total Spent</div>
@@ -99,9 +83,7 @@
       <span id="tripActiveName">Loading trips...</span>
       <span class="cur-badge" id="tripCurBadge" style="display:none"></span>
     </div>
-    
     <div class="people-badges" id="peopleBadges"></div>
-    
     <div class="trip-actions-row">
       <button class="btn-sm btn-trips" onclick="toggleTripList()" id="switchBtn">Switch trip</button>
       <button class="btn-sm btn-new" onclick="toggleNewTripForm()">+ New trip</button>
@@ -112,7 +94,6 @@
     <div class="new-trip-form" id="newTripForm">
       <hr/>
       <div class="field"><label>Trip name</label><input type="text" id="tripInput" placeholder="e.g., Tokyo Nov 2026" /></div>
-      
       <div class="row2">
         <div class="field">
           <label>Local Currency</label>
@@ -121,19 +102,303 @@
             <option value="THB" data-symbol="฿" data-rate="33">THB – Thai Baht</option>
             <option value="VND" data-symbol="₫" data-rate="25000">VND – Vietnamese Dong</option>
             <option value="MYR" data-symbol="RM" data-rate="4.7">MYR – Malaysian Ringgit</option>
-            <option value="SGD" data-symbol="S$" data-rate="1.35">SGD – Singapore Dollar</option>
-            <option value="IDR" data-symbol="Rp" data-rate="16000">IDR – Indonesian Rupiah</option>
-            <option value="PHP" data-symbol="₱" data-rate="58">PHP – Philippine Peso</option>
-            <option value="LAK" data-symbol="₭" data-rate="21000">LAK – Lao Kip</option>
             <option value="JPY" data-symbol="¥" data-rate="155">JPY – Japanese Yen</option>
-            <option value="KRW" data-symbol="₩" data-rate="1370">KRW – South Korean Won</option>
-            <option value="CNY" data-symbol="¥" data-rate="7.2">CNY – Chinese Yuan</option>
-            <option value="TWD" data-symbol="NT$" data-rate="32">TWD – New Taiwan Dollar</option>
-            <option value="HKD" data-symbol="HK$" data-rate="7.8">HKD – Hong Kong Dollar</option>
-            <option value="USD" data-symbol="$" data-rate="1">USD – US Dollar</option>
             <option value="EUR" data-symbol="€" data-rate="0.92">EUR – Euro</option>
             <option value="GBP" data-symbol="£" data-rate="0.78">GBP – British Pound</option>
-            <option value="AUD" data-symbol="A$" data-rate="1.50">AUD – Australian Dollar</option>
-            <option value="CAD" data-symbol="C$" data-rate="1.37">CAD – Canadian Dollar</option>
           </select>
         </div>
+        <div class="field"><label>Exchange Rate (1 USD =)</label><input type="number" step="any" id="customRate" value="4100"/></div>
+      </div>
+      <div class="field">
+        <label>Spenders / Participants</label>
+        <div class="person-grid">
+          <input type="text" class="p-name-input" placeholder="Person 1" value="Polin" />
+          <input type="text" class="p-name-input" placeholder="Person 2" value="Ivy" />
+          <input type="text" class="p-name-input" placeholder="Person 3" />
+          <input type="text" class="p-name-input" placeholder="Person 4" />
+        </div>
+      </div>
+      <button class="btn-save" onclick="createNewTrip()">Initialize Trip</button>
+    </div>
+  </div>
+
+  <div id="mainFormBlock" style="display:none;">
+    <div class="sec">Add New Expense</div>
+    <div class="field"><label>Item Description</label><input type="text" id="description" placeholder="e.g., Grocery, Coffee, Taxi" /></div>
+    
+    <div class="row2">
+      <div class="field">
+        <label>Amount</label>
+        <div class="amount-wrap">
+          <input type="number" step="any" id="amount" placeholder="0.00" oninput="calculateExchange()"/>
+          <select class="cur-select" id="inputCurrency" onchange="calculateExchange()">
+            <option value="USD">USD ($)</option>
+            <option value="LOCAL" id="localOptSlot">LOCAL</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>Date</label><input type="date" id="expenseDate" /></div>
+    </div>
+
+    <div class="row2">
+      <div class="field"><label>Category</label>
+        <select id="category">
+          <option value="🍔 Food & Dining">🍔 Food & Dining</option>
+          <option value="🚖 Transport">🚖 Transport</option>
+          <option value="🏨 Hotel & Stay">🏨 Hotel & Stay</option>
+          <option value="🎟️ Entertainment">🎟️ Entertainment</option>
+          <option value="🛍️ Shopping">🛍️ Shopping</option>
+          <option value="📦 Others">📦 Others</option>
+        </select>
+      </div>
+      <div class="field"><label>Spent By</label><select id="spentBy"></select></div>
+    </div>
+
+    <button class="btn-add" id="submitBtn" onclick="addExpense()">Add Expense</button>
+    <div id="feedback" class="msg"></div>
+  </div>
+
+  <div class="sec">History Log</div>
+  <div id="historyContainer"><div class="empty">Connect your data engine above...</div></div>
+  
+  <a href="#" id="reportLink" class="btn-report">📊 View Detailed Report</a>
+</div>
+
+<script>
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw8Ufgf_CZohrIrEc_QLwCKYR65KTDlzfc2PgeT0qYiGJSmiuUP6apx21NLVPZ3jn49RQ/exec';
+
+let currentTrip = null;
+let activeTripsList = [];
+let activeLocalSymbol = "៛";
+let activeExchangeRate = 4100;
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById('expenseDate').value = new Date().toISOString().substring(0,10);
+  setupIdentity();
+  fetchTripsData();
+  
+  document.getElementById('localCurrency').addEventListener('change', (e) => {
+    const opt = e.target.options[e.target.selectedIndex];
+    document.getElementById('customRate').value = opt.getAttribute('data-rate');
+  });
+});
+
+function setupIdentity() {
+  let user = localStorage.getItem('expense_username') || "Guest";
+  document.getElementById('userIdentityBadge').textContent = "Logging as: " + user;
+}
+
+function promptForIdentity() {
+  let name = prompt("Enter your name to sign your expenses:");
+  if(name && name.trim() !== "") {
+    localStorage.setItem('expense_username', name.trim());
+    setupIdentity();
+  }
+}
+
+async function fetchTripsData() {
+  try {
+    const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=get_trips`);
+    activeTripsList = await res.json();
+    
+    if(activeTripsList.length === 0) {
+      document.getElementById('tripActiveName').textContent = "No trips found. Create one!";
+      return;
+    }
+    
+    let saved = localStorage.getItem('selected_trip');
+    let matched = activeTripsList.find(t => t.name === saved) || activeTripsList[0];
+    activateTrip(matched);
+    buildTripSelectionMenu();
+  } catch(e) {
+    document.getElementById('tripActiveName').className = "trip-active err";
+    document.getElementById('tripActiveName').textContent = "Handshake Error.";
+  }
+}
+
+function activateTrip(tripObj) {
+  currentTrip = tripObj;
+  localStorage.setItem('selected_trip', tripObj.name);
+  
+  document.getElementById('tripActiveName').textContent = "✈️ " + tripObj.name;
+  document.getElementById('mainFormBlock').style.display = 'block';
+  
+  // Set up local currencies
+  const selectNode = document.getElementById('localCurrency');
+  let matchedOption = Array.from(selectNode.options).find(o => o.value === tripObj.localCur);
+  activeLocalSymbol = matchedOption ? matchedOption.getAttribute('data-symbol') : "៛";
+  activeExchangeRate = matchedOption ? parseFloat(matchedOption.getAttribute('data-rate')) : 4100;
+  
+  document.getElementById('tripCurBadge').style.display = 'inline-block';
+  document.getElementById('tripCurBadge').textContent = `USD + ${tripObj.localCur}`;
+  document.getElementById('localOptSlot').textContent = tripObj.localCur;
+  document.getElementById('localOptSlot').value = tripObj.localCur;
+  
+  // Paint person badges
+  const badgesBox = document.getElementById('peopleBadges');
+  badgesBox.innerHTML = tripObj.people.map(p => `<span class="person-pill">${p}</span>`).join('');
+  
+  // Populate "Spent By" dropdown options selector layout
+  const spentBySelect = document.getElementById('spentBy');
+  spentBySelect.innerHTML = tripObj.people.map(p => `<option value="${p}">${p}</option>`).join('');
+  
+  document.getElementById('reportLink').href = `report.html?trip=${encodeURIComponent(tripObj.name)}`;
+  
+  fetchHistory();
+}
+
+function buildTripSelectionMenu() {
+  const container = document.getElementById('tripList');
+  container.innerHTML = activeTripsList.map(t => `
+    <div class="trip-item ${currentTrip && currentTrip.name === t.name ? 'active' : ''}" onclick="selectTripItem('${t.name}')">
+      <span>✈️ <strong>${t.name}</strong></span>
+      <span style="font-size:12px;color:#64748b;">${t.localCur}</span>
+    </div>
+  `).join('');
+}
+
+function selectTripItem(name) {
+  let matched = activeTripsList.find(t => t.name === name);
+  if(matched) {
+    activateTrip(matched);
+    toggleTripList();
+  }
+}
+
+function toggleTripList() {
+  document.getElementById('tripList').classList.toggle('open');
+}
+function toggleNewTripForm() {
+  document.getElementById('newTripForm').classList.toggle('open');
+}
+
+async function createNewTrip() {
+  const nameInput = document.getElementById('tripInput').value.trim();
+  const curValue = document.getElementById('localCurrency').value;
+  const rateValue = parseFloat(document.getElementById('customRate').value) || 4100;
+  
+  if(!nameInput) return alert("Please supply a trip title.");
+  
+  let pNames = ["Shared"];
+  document.querySelectorAll('.p-name-input').forEach(el => {
+    if(el.value.trim()) pNames.push(el.value.trim());
+  });
+
+  const payload = {
+    action: "write",
+    trip_name: nameInput,
+    description: "Trip Initialization",
+    amount_usd: 0,
+    amount_local: 0,
+    currency: "USD",
+    local_currency: curValue,
+    category: "System",
+    spent_by: "Shared",
+    all_people: pNames,
+    added_by: localStorage.getItem('expense_username') || "Guest"
+  };
+
+  try {
+    let res = await fetch(GOOGLE_SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
+    let data = await res.json();
+    if(data.status === "success") {
+      document.getElementById('tripInput').value = "";
+      toggleNewTripForm();
+      fetchTripsData();
+    }
+  } catch(e) { alert("Initialization failed."); }
+}
+
+async function fetchHistory() {
+  if(!currentTrip) return;
+  const container = document.getElementById('historyContainer');
+  container.innerHTML = '<div class="empty">Syncing records table...</div>';
+  
+  try {
+    let res = await fetch(`${GOOGLE_SCRIPT_URL}?action=read&trip=${encodeURIComponent(currentTrip.name)}`);
+    let entries = await res.json();
+    
+    let validRows = entries.filter(e => parseFloat(e.amount_usd || 0) > 0);
+    let totalSumUSD = validRows.reduce((sum, item) => sum + parseFloat(item.amount_usd || 0), 0);
+    
+    document.getElementById('total').textContent = `$${totalSumUSD.toFixed(2)}`;
+    document.getElementById('totalSecondary').textContent = `≈ ${(totalSumUSD * activeExchangeRate).toLocaleString(undefined, {maximumFractionDigits:0})} ${currentTrip.localCur}`;
+    
+    if(validRows.length === 0) {
+      container.innerHTML = '<div class="empty">No expenses registered under this trip yet.</div>';
+      return;
+    }
+    
+    container.innerHTML = validRows.map(item => {
+      let isLocal = item.currency !== "USD";
+      let displayPrice = isLocal ? 
+        `${activeLocalSymbol}${parseFloat(item.amount_local).toLocaleString(undefined, {maximumFractionDigits:2})}` : 
+        `$${parseFloat(item.amount_usd).toFixed(2)}`;
+        
+      return `
+        <div class="entry">
+          <div class="entry-left">
+            <div class="desc">${item.description}</div>
+            <div class="meta">${item.expense_date} • ${item.category}</div>
+          </div>
+          <div class="entry-right">
+            <div class="price">${displayPrice}</div>
+            <div class="who">${item.spent_by}</div>
+          </div>
+          <button class="btn-icon" onclick="deleteItem('${item.id}')">🗑️</button>
+        </div>`;
+    }).join('');
+    
+  } catch(e) { container.innerHTML = '<div class="empty err">Failed syncing log.</div>'; }
+}
+
+async function addExpense() {
+  const desc = document.getElementById('description').value.trim();
+  const amt = parseFloat(document.getElementById('amount').value) || 0;
+  const cur = document.getElementById('inputCurrency').value;
+  
+  if(!desc || amt <= 0) return alert("Verify fields are filled out.");
+  
+  let usd = cur === "USD" ? amt : amt / activeExchangeRate;
+  let loc = cur === "USD" ? amt * activeExchangeRate : amt;
+  
+  const payload = {
+    action: "write",
+    trip_name: currentTrip.name,
+    description: desc,
+    amount_usd: usd,
+    amount_local: loc,
+    currency: cur === "USD" ? "USD" : currentTrip.localCur,
+    local_currency: currentTrip.localCur,
+    category: document.getElementById('category').value,
+    spent_by: document.getElementById('spentBy').value,
+    expense_date: document.getElementById('expenseDate').value,
+    added_by: localStorage.getItem('expense_username') || "Guest"
+  };
+
+  document.getElementById('submitBtn').disabled = true;
+  try {
+    let res = await fetch(GOOGLE_SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
+    let data = await res.json();
+    if(data.status === "success") {
+      document.getElementById('description').value = "";
+      document.getElementById('amount').value = "";
+      fetchHistory();
+    }
+  } catch(e) { alert("Failed storing record."); }
+  document.getElementById('submitBtn').disabled = false;
+}
+
+async function deleteItem(id) {
+  if(!confirm("Delete this entry row?")) return;
+  try {
+    let res = await fetch(GOOGLE_SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "delete", id: id }) });
+    let data = await res.json();
+    if(data.status === "success") fetchHistory();
+  } catch(e) { alert("Delete failed."); }
+}
+
+function calculateExchange() {}
+</script>
+</body>
+</html>

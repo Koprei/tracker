@@ -2,219 +2,227 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Trip Expense Report</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Trip Financial Summary Report</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', sans-serif; background: #f0f4f8; min-height: 100vh; padding: 1.25rem; color: #0f172a; }
-  .card { background: #fff; border-radius: 20px; padding: 1.5rem; max-width: 540px; margin: 0 auto; box-shadow: 0 4px 24px rgba(0,0,0,.07); }
+  body { font-family: 'DM Sans', sans-serif; background: #f4f7fa; color: #0f172a; padding: 1rem .5rem; display: flex; justify-content: center; }
+  .report-container { width: 100%; max-width: 600px; background: #fff; min-height: 100vh; padding: 1.5rem 1.25rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04); display: flex; flex-direction: column; }
+  @media(min-width: 540px) { body { padding: 2rem 1rem; } .report-container { min-height: auto; padding: 2.2rem; } }
   
-  .header-actions { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-  .btn-back { background: #f1f5f9; color: #475569; border: none; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; text-decoration: none; font-family: 'DM Sans', sans-serif; }
-  .btn-back:hover { background: #e2e8f0; }
+  .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+  .btn-back { background: #f1f5f9; border: 1px solid #e2e8f0; color: #475569; padding: 8px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; }
+  h1 { font-size: 22px; font-weight: 700; color: #0f172a; letter-spacing: -0.02em; }
+  .trip-title { font-size: 16px; color: #0369a1; background: #e0f2fe; padding: 6px 14px; border-radius: 12px; width: fit-content; font-weight: 700; margin-top: 4px; }
   
-  h1 { font-size: 21px; font-weight: 600; text-align: center; color: #0f172a; }
-  .subtitle { font-size: 13px; color: #94a3b8; text-align: center; margin-top: 3px; margin-bottom: 1.25rem; }
+  .stat-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 16px; padding: 1.25rem; color: #fff; box-shadow: 0 8px 20px rgba(15, 23, 42, 0.1); margin-bottom: 1.5rem; }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .stat-item { border-left: 2px solid #38bdf8; padding-left: 10px; }
+  .stat-lbl { font-size: 11px; text-transform: uppercase; color: #94a3b8; letter-spacing: .05em; font-weight: 600; }
+  .stat-val { font-size: 20px; font-weight: 700; margin-top: 2px; }
+  .stat-val.sub { font-size: 13px; color: #cbd5e1; font-weight: 500; }
 
-  .total-box { background: #0f172a; border-radius: 14px; padding: 1.1rem; text-align: center; margin-bottom: 1.25rem; }
-  .total-box .lbl { font-size: 10px; letter-spacing: .1em; color: #64748b; text-transform: uppercase; }
-  .total-box .amt { font-size: 30px; font-weight: 600; color: #fff; margin-top: 4px; }
-
-  .sec { font-size: 11px; font-weight: 600; letter-spacing: .08em; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; margin-top: 1.5rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 4px; }
+  .sec-title { font-size: 12px; font-weight: 700; letter-spacing: .08em; color: #64748b; text-transform: uppercase; margin-bottom: 10px; margin-top: 1.5rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px; }
   
-  /* Breakdown Row Styles */
-  .item-row { display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0; font-size: 14px; border-bottom: 1px solid #f8fafc; }
-  .item-row:last-child { border-bottom: none; }
-  .item-label { font-weight: 500; color: #334155; }
-  .item-value { font-weight: 600; color: #0f172a; text-align: right; }
-  
-  /* Category Progress Bar UI */
-  .cat-wrapper { margin-bottom: 10px; }
-  .cat-info { display: flex; justify-content: space-between; font-size: 13px; font-weight: 500; margin-bottom: 4px; }
-  .progress-bg { background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden; }
-  .progress-fill { background: #3b82f6; height: 100%; border-radius: 4px; width: 0%; transition: width 0.3s ease; }
+  .bar-row { margin-bottom: 12px; }
+  .bar-meta { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px; font-weight: 500; }
+  .bar-track { background: #e2e8f0; height: 8px; border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; background: #0f172a; border-radius: 4px; width: 0; transition: width 0.4s ease; }
 
-  .loading, .empty { text-align: center; color: #94a3b8; font-size: 14px; padding: 2rem 0; }
-  .error-msg { text-align: center; color: #ef4444; font-size: 13px; padding: 1rem; background: #fef2f2; border-radius: 10px; border: 1px solid #fecaca; }
+  .matrix-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .matrix-name { font-weight: 600; font-size: 15px; }
+  .matrix-calc { text-align: right; }
+  .text-green { color: #16a34a; font-weight: 700; }
+  .text-red { color: #dc2626; font-weight: 700; }
+  
+  .settle-card { background: #f0fdf4; border: 1px dashed #bbf7d0; border-radius: 12px; padding: 12px; margin-bottom: 8px; font-size: 14px; color: #166534; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+
+  .table-row { display: flex; justify-content: space-between; padding: 10px 4px; border-bottom: 1px solid #f8fafc; font-size: 14px; }
+  .table-row:last-child { border-bottom: none; }
+  .tbl-desc { font-weight: 600; color: #0f172a; }
+  .tbl-meta { font-size: 12px; color: #64748b; margin-top: 2px; }
+  .tbl-amt { font-weight: 700; text-align: right; }
+  
+  .loading-state { text-align: center; color: #64748b; font-size: 15px; padding: 3rem 0; font-weight: 500; }
+  .empty { text-align: center; color: #94a3b8; font-size: 14px; padding: 1.5rem 0; }
 </style>
 </head>
 <body>
 
-<div class="card">
-  <div class="header-actions">
-    <a href="index.html" class="btn-back">← Form</a>
+<div class="report-container">
+  <div class="header">
+    <div>
+      <h1>Trip Analytics</h1>
+      <div class="trip-title" id="tripHeaderName">Connecting...</div>
+    </div>
+    <a href="index.html" class="btn-back">← Back</a>
   </div>
 
-  <h1 id="tripTitle">Trip Report</h1>
-  <p class="subtitle" id="tripSubtitle">Analyzing settlement details</p>
+  <div id="loadingBlock" class="loading-state">Compiling spreadsheet accounts...</div>
 
-  <div class="total-box">
-    <div class="lbl">Grand Total Spent</div>
-    <div class="amt" id="reportTotal">$0.00</div>
-  </div>
+  <div id="reportContent" style="display: none;">
+    <div class="stat-card">
+      <div class="stat-grid">
+        <div class="stat-item">
+          <div class="stat-lbl">Total Trip Volume</div>
+          <div class="stat-val" id="topTotalUSD">$0.00</div>
+          <div class="stat-val sub" id="topTotalLocal"></div>
+        </div>
+        <div class="stat-item" style="border-color: #a855f7;">
+          <div class="stat-lbl">Per Person Cost</div>
+          <div class="stat-val" id="topPerPerson">$0.00</div>
+          <div class="stat-val sub" id="topActiveCount">Shared Split</div>
+        </div>
+      </div>
+    </div>
 
-  <div id="loadingStatus" class="loading">Fetching data from Google Sheets...</div>
-  <div id="errorContainer" style="display:none;"></div>
+    <div class="sec-title">Balancing Matrix (Who owes What)</div>
+    <div id="settlementPlan"></div>
+    <div id="memberMatrix"></div>
 
-  <div id="reportContent" style="display:none;">
-    <!-- Section 1: Split Breakdown -->
-    <div class="sec">Individual Balances (Equal Split)</div>
-    <div id="balanceList"></div>
+    <div class="sec-title">Category Breakdown</div>
+    <div id="categoryChart"></div>
 
-    <!-- Section 2: Payer Summary -->
-    <div class="sec">Who Paid (Total Out of Pocket)</div>
-    <div id="payerList"></div>
-
-    <!-- Section 3: Category Breakdown -->
-    <div class="sec">Spending by Category</div>
-    <div id="categoryList"></div>
+    <div class="sec-title">Itemized History</div>
+    <div id="historyLedger"></div>
   </div>
 </div>
 
 <script>
-// ── PASTE YOUR COPIED GOOGLE WEB APP URL HERE ───────────────────────────
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw8Ufgf_CZohrIrEc_QLwCKYR65KTDlzfc2PgeT0qYiGJSmiuUP6apx21NLVPZ3jn49RQ/exec';
-// ──────────────────────────────────────────────────────────────────────
 
-// Extract target trip from URL parameters
+const SYMBOLS = { KHR:'៛', THB:'฿', VND:'₫', MYR:'RM', SGD:'S$', IDR:'Rp', PHP:'₱', LAK:'₭', JPY:'¥', KRW:'₩', CNY:'¥', TWD:'NT$', HKD:'HK$', USD:'$', EUR:'€', GBP:'£', AUD:'A$', CAD:'C$' };
+
+// Pull core identifiers out from query params or localStorage
 const urlParams = new URLSearchParams(window.location.search);
-const currentTrip = urlParams.get('trip');
+const targetTripName = urlParams.get('trip') || localStorage.getItem('trip_name');
 
-// Fallback metadata if local storage configurations are inaccessible
-const tripPeople = JSON.parse(localStorage.getItem('trip_people') || '["Shared"]');
+let localCurCode   = 'KHR';
+let localCurSymbol = '៛';
+let exchangeRate   = 4100;
+let rosterNames    = ['Shared']; 
 
-if (!currentTrip) {
-  showError('No active trip specified. Please select a trip from the main tracker panel.');
-} else {
-  document.getElementById('tripTitle').textContent = currentTrip;
-  fetchReportData();
-}
-
-function showError(msg) {
-  document.getElementById('loadingStatus').style.display = 'none';
-  const errContainer = document.getElementById('errorContainer');
-  errContainer.innerHTML = `<div class="error-msg">${msg}</div>`;
-  errContainer.style.display = 'block';
-}
-
-async function fetchReportData() {
-  try {
-    // Appends an action identifier flag for the web app handler logic
-    const targetUrl = `${GOOGLE_SCRIPT_URL}?action=read&trip=${encodeURIComponent(currentTrip)}`;
-    
-    const response = await fetch(targetUrl);
-    if (!response.ok) throw new Error('Network visibility error communicating with script environment.');
-    
-    const data = await response.json();
-    processAndRenderReport(data);
-  } catch (err) {
-    console.error(err);
-    showError('Failed to access transaction records. Verify deployment configurations or web permission properties.');
-  }
-}
-
-function processAndRenderReport(rows) {
-  document.getElementById('loadingStatus').style.display = 'none';
-  
-  if (!rows || rows.length === 0) {
-    showError('No verified entries recorded for this specific deployment sequence.');
+async function executeReportPipeline() {
+  if (!targetTripName) {
+    document.getElementById('loadingBlock').innerHTML = '⚠️ Error: No trip selected context found.';
     return;
   }
+  document.getElementById('tripHeaderName').textContent = '✈️ ' + targetTripName;
 
-  document.getElementById('reportContent').style.display = 'block';
+  try {
+    // 1. Sync data arrays from the dynamic endpoints
+    const tripRes = await fetch(`${GOOGLE_SCRIPT_URL}?action=get_trips`);
+    const trips   = await tripRes.json();
+    const match   = trips.find(t => t.name === targetTripName);
 
-  let grandTotal = 0;
-  let categoryMap = {};
-  let payerMap = {};
+    if (match) {
+      localCurCode   = match.localCur || 'KHR';
+      localCurSymbol = SYMBOLS[localCurCode] || '$';
+      exchangeRate   = match.rate || 4100;
+      rosterNames    = match.people || ['Shared'];
+    }
 
-  // Extract filtered array metrics 
-  const filteredPeople = tripPeople.filter(p => p !== 'Shared');
-  const participantCount = filteredPeople.length || 1; 
+    const dataRes = await fetch(`${GOOGLE_SCRIPT_URL}?action=read&trip=${encodeURIComponent(targetTripName)}`);
+    const transactions = await dataRes.json();
 
-  // Initialize data collection objects dynamically
-  filteredPeople.forEach(p => {
-    payerMap[p] = 0;
-  });
+    // 2. Clear out view constraints 
+    document.getElementById('loadingBlock').style.display = 'none';
+    document.getElementById('reportContent').style.display = 'block';
 
-  rows.forEach(r => {
-    // Normalizes column naming variations across script logic layers
-    const amountUSD = parseFloat(r.amount_usd || r.amount || 0);
-    const spentBy = r.spent_by || r.spend_by || 'Shared';
-    const cat = r.category || 'Other';
+    generateMetrics(transactions);
 
-    grandTotal += amountUSD;
+  } catch (err) {
+    console.error(err);
+    document.getElementById('loadingBlock').innerHTML = '⚠️ Broken response from Google Sheets structure.';
+  }
+}
 
-    // Track expenses by category
-    categoryMap[cat] = (categoryMap[cat] || 0) + amountUSD;
+function generateMetrics(rows) {
+  // Filter out any leftover trip config rows safely
+  const expenses = rows.filter(r => r.description !== "Trip Initialization");
 
-    // Track out-of-pocket costs by individual payer
-    if (spentBy !== 'Shared') {
-      if (payerMap[spentBy] !== undefined) {
-        payerMap[spentBy] += amountUSD;
-      } else {
-        payerMap[spentBy] = amountUSD;
+  const totalUSD = expenses.reduce((s, r) => s + parseFloat(r.amount_usd || 0), 0);
+  const totalLocal = totalUSD * exchangeRate;
+
+  // Render Headline Widgets
+  document.getElementById('topTotalUSD').textContent = '$' + totalUSD.toLocaleString('en', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  if (localCurCode !== 'USD') {
+    document.getElementById('topTotalLocal').textContent = '≈ ' + localCurSymbol + totalLocal.toLocaleString('en', {maximumFractionDigits: 0});
+  }
+
+  // Filter roster names to actual family members (exclude "Shared")
+  const activeMembers = rosterNames.filter(name => name !== "Shared");
+  const memberCount = activeMembers.length || 1;
+  const perPersonCost = totalUSD / memberCount;
+
+  document.getElementById('topPerPerson').textContent = '$' + perPersonCost.toLocaleString('en', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('topActiveCount').textContent = `Split across ${memberCount} members`;
+
+  // --- COMPUTE BALANCES ---
+  // Initialize balances object
+  let spentMap = {};
+  let oweMap = {};
+  activeMembers.forEach(m => { spentMap[m] = 0; oweMap[m] = 0; });
+
+  expenses.forEach(r => {
+    const amt = parseFloat(r.amount_usd || 0);
+    const payer = r.spent_by;
+
+    if (payer === "Shared") {
+      // Split evenly among everyone
+      activeMembers.forEach(m => { oweMap[m] += amt / memberCount; });
+    } else {
+      // Payer spent money for themselves
+      if (spentMap[payer] !== undefined) {
+        spentMap[payer] += amt;
+        oweMap[payer] += amt;
       }
     }
   });
 
-  // Render Headline Core Value Total
-  document.getElementById('reportTotal').textContent = '$' + grandTotal.toLocaleString('en', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  // Render Individual Matrix
+  const matrixContainer = document.getElementById('memberMatrix');
+  let matrixHtml = '';
 
-  // Calculate standard equal split distribution metrics
-  const sharePerPerson = grandTotal / participantCount;
-
-  // 1. Build Balance Settlement Interface List
-  const balanceList = document.getElementById('balanceList');
-  balanceList.innerHTML = filteredPeople.map(p => {
-    const paid = payerMap[p] || 0;
-    const balance = paid - sharePerPerson;
-    let balanceText = '';
-    let statusStyle = '';
-
-    if (balance > 0) {
-      balanceText = `Gets back $${balance.toFixed(2)}`;
-      statusStyle = 'color: #16a34a;'; // green
-    } else if (balance < 0) {
-      balanceText = `Owes $${Math.abs(balance).toFixed(2)}`;
-      statusStyle = 'color: #dc2626;'; // red
+  activeMembers.forEach(m => {
+    const net = spentMap[m] - oweMap[m];
+    let statusText = '';
+    if (net > 0) {
+      statusText = `<span class="text-green">Gets back $${net.toFixed(2)}</span>`;
+    } else if (net < 0) {
+      statusText = `<span class="text-red">Owes $${Math.abs(net).toFixed(2)}</span>`;
     } else {
-      balanceText = 'Settled up';
-      statusStyle = 'color: #64748b;'; // grey
+      statusText = `<span style="color:#64748b;font-weight:600;">Settled</span>`;
     }
 
-    return `
-      <div class="item-row">
-        <span class="item-label">${p}</span>
-        <span class="item-value" style="${statusStyle}">${balanceText}</span>
-      </div>`;
-  }).join('');
-
-  // 2. Build Payer Totals Interface List
-  const payerList = document.getElementById('payerList');
-  payerList.innerHTML = Object.keys(payerMap).map(p => `
-    <div class="item-row">
-      <span class="item-label">${p}</span>
-      <span class="item-value">$${payerMap[p].toLocaleString('en', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
-    </div>`).join('');
-
-  // 3. Build Category Breakdown Metric Chart UI Elements
-  const categoryList = document.getElementById('categoryList');
-  categoryList.innerHTML = Object.keys(categoryMap).map(cat => {
-    const amt = categoryMap[cat];
-    const pct = grandTotal > 0 ? (amt / grandTotal) * 100 : 0;
-    return `
-      <div class="cat-wrapper">
-        <div class="cat-info">
-          <span class="item-label">${cat}</span>
-          <span class="item-value">$${amt.toFixed(2)} (${pct.toFixed(0)}%)</span>
-        </div>
-        <div class="progress-bg">
-          <div class="progress-fill" style="width: ${pct}%"></div>
+    matrixHtml += `
+      <div class="matrix-item">
+        <div class="matrix-name">${m}</div>
+        <div class="matrix-calc">
+          <div style="font-size:12px;color:#64748b;">Paid: $${spentMap[m].toFixed(2)} | Owes: $${oweMap[m].toFixed(2)}</div>
+          <div style="margin-top:2px;">${statusText}</div>
         </div>
       </div>`;
-  }).join('');
-}
-</script>
-</body>
-</html>
+  });
+  matrixContainer.innerHTML = matrixHtml || '<div class="empty">No roster metrics found.</div>';
+
+  // --- DEBT CLEARING ALGORITHM ---
+  let debtList = [];
+  activeMembers.forEach(m => {
+    debtList.push({ name: m, balance: spentMap[m] - oweMap[m] });
+  });
+
+  const settlementContainer = document.getElementById('settlementPlan');
+  let settlementHtml = '';
+
+  // Safe iteration parameters to clear up cross-debts
+  let loops = 0;
+  while (loops < 50) {
+    debtList.sort((a, b) => a.balance - b.balance);
+    let debtor = debtList[0];
+    let creditor = debtList[debtList.length - 1];
+
+    if (!debtor || !creditor || Math.abs(debtor.balance) < 0.01 || Math.abs(creditor.balance) < 0.01) break;
+
+    let amountToS

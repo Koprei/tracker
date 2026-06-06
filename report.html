@@ -12,25 +12,18 @@
   body { font-family: 'DM Sans', sans-serif; background: #f4f7fa; min-height: 100vh; color: #0f172a; display: flex; justify-content: center; }
   .app-container { width: 100%; max-width: 540px; background: #fff; min-height: 100vh; padding: 1.5rem 1.25rem; display: flex; flex-direction: column; }
   @media (min-width: 540px) { body { padding: 2rem 1rem; } .app-container { min-height: auto; border-radius: 24px; box-shadow: 0 10px 40px rgba(15, 23, 42, 0.06); padding: 2rem; } }
-  
   .header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
   h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
   .btn-back { padding: 6px 14px; border-radius: 10px; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; }
-  
   .trip-title-badge { font-size: 15px; font-weight: 600; color: #0f172a; background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 14px; border-radius: 12px; margin-bottom: 1.5rem; text-align: center; }
   .status-msg { text-align: center; color: #64748b; font-size: 14px; padding: 3rem 0; font-weight: 500; }
   .err-msg { color: #dc2626; background: #fef2f2; border: 1px solid #fee2e2; padding: 1rem; border-radius: 12px; font-size: 14px; margin: 1rem 0; text-align: center; }
-  
   .sec { font-size: 11px; font-weight: 700; letter-spacing: .08em; color: #64748b; text-transform: uppercase; margin-bottom: 10px; margin-top: 1.5rem; }
-  
-  /* Cards & Breakdowns */
   .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.25rem; margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02); }
   .stat-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
   .stat-row:last-child { border-bottom: none; padding-bottom: 0; }
   .stat-label { font-weight: 500; color: #475569; }
   .stat-val { font-weight: 700; color: #0f172a; }
-  
-  /* Matrix/Settlement list */
   .settle-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 8px; font-size: 14px; }
   .settle-text { font-weight: 500; color: #334155; }
   .settle-text strong { color: #0f172a; font-weight: 600; }
@@ -48,22 +41,12 @@
   <div class="trip-title-badge" id="tripTitle">Checking parameters...</div>
   <div id="statusStream" class="status-msg">Connecting data streams...</div>
 
-  <!-- Hidden by default, unrolled by script -->
   <div id="reportContent" style="display: none;">
     <div class="sec">Trip Financials (USD)</div>
     <div class="card">
-      <div class="stat-row">
-        <span class="stat-label">Total Expenditure</span>
-        <span class="stat-val" id="summaryTotal">$0.00</span>
-      </div>
-      <div class="stat-row">
-        <span class="stat-label">Active Participants</span>
-        <span class="stat-val" id="summaryPeople">0</span>
-      </div>
-      <div class="stat-row">
-        <span class="stat-label">Per-Person Share</span>
-        <span class="stat-val" id="summaryPerCapita">$0.00</span>
-      </div>
+      <div class="stat-row"><span class="stat-label">Total Expenditure</span><span class="stat-val" id="summaryTotal">$0.00</span></div>
+      <div class="stat-row"><span class="stat-label">Active Participants</span><span class="stat-val" id="summaryPeople">0</span></div>
+      <div class="stat-row"><span class="stat-label">Per-Person Share</span><span class="stat-val" id="summaryPerCapita">$0.00</span></div>
     </div>
 
     <div class="sec">Individual Spending Balance</div>
@@ -75,16 +58,14 @@
 </div>
 
 <script>
-// Must precisely map to your backend setup
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw8Ufgf_CZohrIrEc_QLwCKYR65KTDlzfc2PgeT0qYiGJSmiuUP6apx21NLVPZ3jn49RQ/exec';
 
-// 1. Parse Trip Target directly out of URL params safely
 const urlParams = new URLSearchParams(window.location.search);
 const targetTrip = urlParams.get('trip');
 
 document.addEventListener("DOMContentLoaded", () => {
   if (!targetTrip) {
-    showError("No active trip context passed from the control interface. Please return and select a trip.");
+    showError("No active trip context passed from control interface.");
     return;
   }
   document.getElementById('tripTitle').textContent = "✈️ " + targetTrip;
@@ -99,85 +80,65 @@ function showError(msg) {
 
 async function compileReport() {
   try {
-    // 2. Fetch primary trip records
     const recordResponse = await fetch(`${GOOGLE_SCRIPT_URL}?action=read&trip=${encodeURIComponent(targetTrip)}`);
     if (!recordResponse.ok) throw new Error("Server rejected data-read requests.");
     const expenses = await recordResponse.json();
 
-    // 3. Fetch specific configurations to parse the exact member names list
     const configResponse = await fetch(`${GOOGLE_SCRIPT_URL}?action=get_trips`);
     if (!configResponse.ok) throw new Error("Server rejected registry structural mapping.");
     const allTrips = await configResponse.json();
     
     const tripConfig = allTrips.find(t => t.name === targetTrip);
-    if (!tripConfig) {
-      throw new Error(`Trip configuration registry match for "${targetTrip}" was not discovered.`);
-    }
+    if (!tripConfig) throw new Error(`Trip configuration registry match for "${targetTrip}" was not discovered.`);
 
-    // Filter "Shared" identifier out from member pools to isolate actual spenders
     const coreSpenders = (tripConfig.people || ["Shared"]).filter(p => p !== "Shared");
     
     if (coreSpenders.length === 0) {
-      document.getElementById('statusStream').innerHTML = `<div class="status-msg">No individual profile tags mapped. Add expenses or assign names to display dynamic balances.</div>`;
+      document.getElementById('statusStream').innerHTML = `<div class="status-msg">No individual profile tags mapped. Add expenses first.</div>`;
       return;
     }
 
     processMetrics(expenses, coreSpenders);
-
   } catch (err) {
-    console.error(err);
     showError(err.message || "Network handshake exception processing matrices.");
   }
 }
 
 function processMetrics(expenses, spenders) {
-  // Isolate legitimate item records (omit initialization footprints)
   const validExpenses = expenses.filter(e => parseFloat(e.amount_usd || 0) > 0);
-  
-  // Compute true running sum spent overall
   const absoluteTotalUSD = validExpenses.reduce((sum, item) => sum + parseFloat(item.amount_usd || 0), 0);
   const perCapitaCost = absoluteTotalUSD / spenders.length;
 
-  // Build mapping schemas for tracking individual payments
   let paidByMap = {};
   spenders.forEach(p => paidByMap[p] = 0);
 
-  // Compute what each individual actually paid out of pocket
   validExpenses.forEach(item => {
     const payer = item.spent_by;
     const itemCost = parseFloat(item.amount_usd || 0);
 
     if (payer === "Shared" || !payer) {
-      // Split evenly among all group members if flagged as globally shared
       const slice = itemCost / spenders.length;
       spenders.forEach(p => paidByMap[p] += slice);
     } else if (spenders.includes(payer)) {
-      // Standard scenario: One person paid the bill upfront
       paidByMap[payer] += itemCost;
     }
   });
 
-  // Calculate clear balances: Positive means you are owed money, Negative means you owe money
   let individualBalances = [];
   let balanceMap = {};
 
   spenders.forEach(p => {
     const actualPaid = paidByMap[p] || 0;
-    // Basic calculation model: What you actually paid minus your fair share of the total costs
     const clearBalance = actualPaid - perCapitaCost;
-    
     balanceMap[p] = clearBalance;
     individualBalances.push({ name: p, paid: actualPaid, netBalance: clearBalance });
   });
 
-  // 4. Paint Financial Summaries to DOM
   document.getElementById('summaryTotal').textContent = `$${absoluteTotalUSD.toFixed(2)}`;
   document.getElementById('summaryPeople').textContent = spenders.length;
   document.getElementById('summaryPerCapita').textContent = `$${perCapitaCost.toFixed(2)}`;
 
-  // Paint Individual Cards
-  const spendContainer = document.getElementById('individualSpendingContainer');
-  spendContainer.innerHTML = individualBalances.map(row => {
+  document.getElementById('individualSpendingContainer').innerHTML = individualBalances.map(row => {
     const balanceColor = row.netBalance >= 0 ? "#059669" : "#dc2626";
     const balanceSign = row.netBalance >= 0 ? "+" : "";
     return `
@@ -187,34 +148,21 @@ function processMetrics(expenses, spenders) {
       </div>`;
   }).join('');
 
-  // 5. Generate Optimization Settlements Matrix (Greedy Settlement Algorithm)
-  let debtors = [];
-  let creditors = [];
-
+  let debtors = [], creditors = [];
   spenders.forEach(p => {
     const bal = balanceMap[p];
-    if (bal < -0.01) {
-      debtors.push({ name: p, amount: Math.abs(bal) });
-    } else if (bal > 0.01) {
-      creditors.push({ name: p, amount: bal });
-    }
+    if (bal < -0.01) debtors.push({ name: p, amount: Math.abs(bal) });
+    else if (bal > 0.01) creditors.push({ name: p, amount: bal });
   });
 
   let settlementInstructions = [];
   let dIdx = 0, cIdx = 0;
 
   while (dIdx < debtors.length && cIdx < creditors.length) {
-    let debtor = debtors[dIdx];
-    let creditor = creditors[cIdx];
-
+    let debtor = debtors[dIdx], creditor = creditors[cIdx];
     let settlementAmount = Math.min(debtor.amount, creditor.amount);
     
-    settlementInstructions.push({
-      from: debtor.name,
-      to: creditor.name,
-      amount: settlementAmount
-    });
-
+    settlementInstructions.push({ from: debtor.name, to: creditor.name, amount: settlementAmount });
     debtor.amount -= settlementAmount;
     creditor.amount -= settlementAmount;
 
@@ -222,10 +170,9 @@ function processMetrics(expenses, spenders) {
     if (creditor.amount < 0.01) cIdx++;
   }
 
-  // Paint Settlements Matrix to DOM
   const settleContainer = document.getElementById('settlementContainer');
   if (settlementInstructions.length === 0) {
-    settleContainer.innerHTML = `<div class="settle-item" style="justify-content:center;color:#64748b;">Everyone is completely squared away! No transfers required.</div>`;
+    settleContainer.innerHTML = `<div class="settle-item" style="justify-content:center;color:#64748b;">Everyone is completely squared away!</div>`;
   } else {
     settleContainer.innerHTML = settlementInstructions.map(inst => `
       <div class="settle-item">
@@ -234,7 +181,6 @@ function processMetrics(expenses, spenders) {
       </div>`).join('');
   }
 
-  // Disengage loaders, expose finalized viewport matrix elements
   document.getElementById('statusStream').style.display = 'none';
   document.getElementById('reportContent').style.display = 'block';
 }
